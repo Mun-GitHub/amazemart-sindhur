@@ -117,6 +117,12 @@ export default function LaunchItemDetailPage() {
     setPlayingVideo(true);
   };
 
+  const isVideoUrl = (url: string) => {
+    const videoExtensions = /\.(mp4|webm|ogg|mov|avi|mkv)(\?|$)/i;
+    const videoHosts = /youtube\.com|youtu\.be|vimeo\.com/i;
+    return videoExtensions.test(url) || videoHosts.test(url);
+  };
+
   if (loading) {
     return (
       <main className="min-h-screen bg-white flex items-center justify-center">
@@ -284,31 +290,56 @@ export default function LaunchItemDetailPage() {
                         {selectedHotspot.hotspot.description}
                       </p>
 
-                      {/* Video Player */}
+                      {/* Video or Page URL */}
                       {selectedHotspot.hotspot.url && (
                         <div className="mt-3">
-                          {playingVideo ? (
-                            <div className="relative rounded-lg overflow-hidden bg-black">
-                              <video
-                                ref={videoRef}
-                                src={fixImageUrl(`${selectedHotspot.hotspot.url}?environment=${process.env.NEXT_PUBLIC_CONTENTSTACK_ENVIRONMENT}&locale=${locale}`)}
-                                controls
-                                autoPlay
-                                className="w-full h-auto max-h-40"
+                          {isVideoUrl(selectedHotspot.hotspot.url) ? (
+                            playingVideo ? (
+                              <div className="relative rounded-lg overflow-hidden bg-black">
+                                <video
+                                  ref={videoRef}
+                                  src={fixImageUrl(`${selectedHotspot.hotspot.url}?environment=${process.env.NEXT_PUBLIC_CONTENTSTACK_ENVIRONMENT}&locale=${locale}`)}
+                                  controls
+                                  autoPlay
+                                  className="w-full h-auto max-h-40"
+                                >
+                                  Your browser does not support the video tag.
+                                </video>
+                              </div>
+                            ) : (
+                              <button
+                                onClick={handlePlayVideo}
+                                className="flex items-center space-x-2 px-4 py-2 bg-blue-600 hover:bg-blue-700 rounded-lg transition-colors text-sm font-medium cursor-pointer w-full justify-center"
                               >
-                                Your browser does not support the video tag.
-                              </video>
-                            </div>
+                                <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
+                                  <path d="M8 5v14l11-7z" />
+                                </svg>
+                                <span>Play Video</span>
+                              </button>
+                            )
                           ) : (
-                            <button
-                              onClick={handlePlayVideo}
-                              className="flex items-center space-x-2 px-4 py-2 bg-blue-600 hover:bg-blue-700 rounded-lg transition-colors text-sm font-medium cursor-pointer w-full justify-center"
-                            >
-                              <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
-                                <path d="M8 5v14l11-7z" />
-                              </svg>
-                              <span>Play Video</span>
-                            </button>
+                            <div className="rounded-lg overflow-hidden border border-gray-600">
+                              <div className="flex items-center justify-between bg-gray-800 px-3 py-1.5">
+                                <span className="text-gray-400 text-xs truncate max-w-[200px]">{selectedHotspot.hotspot.url}</span>
+                                <a
+                                  href={selectedHotspot.hotspot.url}
+                                  target="_blank"
+                                  rel="noopener noreferrer"
+                                  className="ml-2 text-gray-400 hover:text-white transition-colors flex-shrink-0"
+                                  aria-label="Open in new tab"
+                                >
+                                  <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+                                  </svg>
+                                </a>
+                              </div>
+                              <iframe
+                                src={selectedHotspot.hotspot.url}
+                                className="w-full h-48 bg-white"
+                                title={selectedHotspot.hotspot.title}
+                                sandbox="allow-scripts allow-same-origin allow-forms"
+                              />
+                            </div>
                           )}
                         </div>
                       )}
